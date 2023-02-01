@@ -1,0 +1,117 @@
+---
+title: 'Second Graph Assignment' 
+output: html_notebook
+author: 'Cinthia Illan Vazquez and Devon Lombard Henley' 
+---
+
+```{r}
+#load libraries
+library(tidyverse)
+```
+
+```{r}
+#load data from local and create tabular data frame 
+df_educators <- read_csv("Data/TeacherDemographics_Summary.csv")
+df_students <- read_csv("Data/Student_Enrollment_Summary_Dashboard.csv")
+```
+
+```{r}
+#Checking column names 
+names(df_educators)
+names(df_students)
+```
+```{r}
+#Checking data types 
+str(df_educators,width = 70,strict.width='cut')
+str(df_students,width = 70,strict.width='cut')
+```
+
+```{r}
+#Looking at rows and seeing the shape of the data
+head(df_educators,20)
+head(df_students,20)
+```
+
+```{r}
+#Exploring data 
+absoluteT = df_educators %>%
+  select(`Demographic Category`,`Max. Teacher Count`) %>%
+  arrange(desc(`Max. Teacher Count`))
+
+absoluteS = df_students %>%
+  select(`Student Group`,`Number Of Students`) %>%
+  arrange(desc(`Number Of Students`))
+`
+absoluteT
+absoluteS
+
+#note that our data dowloaded is pre-aggregated data (not individual level data) so no need to identify missing values
+```
+
+```{r}
+#Filtering out gender rows 
+dfrace_educators <- df_educators[df_educators$`Demographic Category Type`=="RaceEthnicity",]
+
+dfrace_students <- df_students [df_students$`Student Group Type`=="federalethracerollupcode",]
+
+#Convert pct columns into numeric
+dfrace_educators$Percent <- as.numeric(gsub("%","",dfrace_educators$`Max. Teacher Percent`))/100
+
+CountAllStudents <- sum(dfrace_students$`Number Of Students`)
+dfrace_students$Percent <- dfrace_students$`Number Of Students`/CountAllStudents
+
+#Merging data frames 
+dfrace_educators$Role <-'Educator'
+dfrace_students$Role <-'Student'
+
+dfrace_educators <-dfrace_educators %>%
+  rename(
+    RaceEthnicity =`Demographic Category`,
+    Count =`Max. Teacher Count`
+  )
+
+dfrace_students <-dfrace_students %>%
+  rename(
+    RaceEthnicity =`Student Group`,
+    Count =`Number Of Students`
+  )
+
+dfrace_educators <-dfrace_educators %>%
+  select(RaceEthnicity, Count, Role, Percent)
+
+dfrace_students <-dfrace_students %>%
+  select(RaceEthnicity, Count, Role, Percent)
+
+dfrace <- union_all(dfrace_educators, dfrace_students)
+
+#Rename variable names
+renamevar <- function(varname){
+  case_when(varname=='Native Hawaiian/Other Pacific Islander' ~ 'Pacific Islander',
+            varname=='Native Hawaiian/ Other Pacific Islander' ~ 'Pacific Islander',
+            varname=='American Indian/Alaskan Native' ~ 'Indigenous',
+            varname=='American Indian/ Alaskan Native' ~ 'Indigenous',
+            varname=='Black/African American' ~'Black',
+            varname=='Black/ African American' ~'Black',
+            varname=='Two or More Races' ~ 'Multiracial',
+            varname=='Hispanic/Latino of any race(s)' ~ 'Latinx',
+            varname=='Hispanic/ Latino of any race(s)' ~ 'Latinx',
+            TRUE ~ varname)
+}
+
+dfrace$RaceEthnicity <- sapply(dfrace$RaceEthnicity, FUN = renamevar)
+```
+
+
+```{r}
+#creating stacked bar plot
+base1=ggplot(data=dfrace,
+             aes(x=Role,
+                 y=Percent,
+                 fill=RaceEthnicity))
+
+barStacked = base1 + geom_bar(stat= "identity",
+                              position = 'stack')
+
+barStacked
+```
+
