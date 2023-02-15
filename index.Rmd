@@ -1,12 +1,13 @@
 ---
 title: 'Second Graph Assignment' 
 output: html_notebook
-author: 'Cinthia Illan Vazquez and Devon Lombard Henley' 
+author: 'Cinthia Illan Vazquez and Devon Lombard-Henley' 
 ---
 
 ```{r}
 #load libraries
 library(tidyverse)
+library(scales)
 ```
 
 ```{r}
@@ -20,6 +21,7 @@ df_students <- read_csv("Data/Student_Enrollment_Summary_Dashboard.csv")
 names(df_educators)
 names(df_students)
 ```
+
 ```{r}
 #Checking data types 
 str(df_educators,width = 70,strict.width='cut')
@@ -101,13 +103,12 @@ renamevar <- function(varname){
 dfrace$RaceEthnicity <- sapply(dfrace$RaceEthnicity, FUN = renamevar)
 ```
 
-
 ```{r}
-#creating stacked bar plot
+#Creating stacked bar plot
 base1=ggplot(data=dfrace,
              aes(x=Role,
                  y=Percent,
-                 fill=RaceEthnicity))
+                 fill=reorder(RaceEthnicity,Percent))) #reorder stacks
 
 barStacked = base1 + geom_bar(stat= "identity",
                               position = 'stack')
@@ -115,3 +116,32 @@ barStacked = base1 + geom_bar(stat= "identity",
 barStacked
 ```
 
+```{r}
+#Annotating plot
+barStackedAnnot = barStacked + geom_text(size = 4,#check below:
+                             position = position_stack(vjust = 0.5),#center
+                             aes(label=percent(Percent,accuracy = 0.1)))#percent format
+
+barStackedAnnotate = barStackedAnnot + scale_y_continuous(labels = percent) + scale_fill_discrete(name="Race or Ethnicity")
+
+barStackedAnnotate
+```
+
+```{r}
+#Add title, labels, & source
+titleText = 'Students Are Far More Diverse Than Educators In Washington'
+sourceText = 'Source: Washington Office of Superindentent of Public Instruction 2020-2021 School Year (self reported data)'
+
+barStackedLabel = barStackedAnnotate + labs(title = titleText,
+                                         x = 'Role',
+                                         y = 'Percent Across Washington Public School',
+                                         caption = sourceText)
+barStackedLabel
+```
+
+```{r}
+#Center title & captions
+barStackedCent = barStackedLabel + theme(plot.caption = element_text(hjust = 0), 
+                      plot.title = element_text(hjust = 0.5))
+barStackedCent
+```
