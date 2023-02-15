@@ -1,7 +1,9 @@
 ---
-title: 'Second Graph Assignment' 
-output: html_notebook
-author: 'Cinthia Illan Vazquez and Devon Lombard-Henley' 
+title: "Second Graph Assignment"
+author: "Cinthia Illan Vazquez and Devon Lombard-Henley"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
@@ -35,20 +37,16 @@ head(df_educators,20)
 head(df_students,20)
 ```
 
-```{r}
+```{r, eval=FALSE}
 #Exploring data 
-absoluteT = df_educators %>%
-  select(`Demographic Category`,`Max. Teacher Count`) %>%
-  arrange(desc(`Max. Teacher Count`))
+# absoluteT = df_educators %>%
+#   select(`Demographic Category`,`Max. Teacher Count`) %>%
+#   arrange(desc(`Max. Teacher Count`))
+# 
+# absoluteS = df_students %>%
+#   select(`Student Group`,`Number Of Students`) %>%
+#   arrange(desc(`Number Of Students`))
 
-absoluteS = df_students %>%
-  select(`Student Group`,`Number Of Students`) %>%
-  arrange(desc(`Number Of Students`))
-`
-absoluteT
-absoluteS
-
-#note that our data dowloaded is pre-aggregated data (not individual level data) so no need to identify missing values
 ```
 
 ```{r}
